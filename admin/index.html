@@ -63,6 +63,7 @@
         1.验证用户是否已经登陆（token）
         2.进入页面之后发送ajax请求获取用户信息
         3.请求成功后将数据渲染到页面
+        4.实现退出功能
 */
     $(function () {
         // 发送ajax请求获取用户数据
@@ -84,6 +85,15 @@
                 $('.user_center_link>img').attr('src', res.data.userPic);
             }
         });
+
+        // 实现退出功能
+        // 获取退出元素，注册点击事件
+        $('.logout').on('click', function () {
+            // 将本地存储中的token数据清除
+            localStorage.removeItem('token');
+            // 跳转到登陆页面
+            location.href = './login.html';
+        })
     })
 </script>
 
