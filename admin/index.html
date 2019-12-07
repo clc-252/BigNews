@@ -55,6 +55,8 @@
         </div>
     </div>
 </body>
+<!-- 引入请求接口地址的js文件 -->
+<script src="./libs/http.js"></script>
 <script>
     /*  
     步骤思路：
@@ -65,7 +67,8 @@
     $(function () {
         // 发送ajax请求获取用户数据
         $.ajax({
-            url: 'http://localhost:8080/api/v1/admin/user/info',
+            // url: 'http://localhost:8080/api/v1/admin/user/info',
+            url: window.BigNew.user_info,
             type: 'get',
             // 要把登陆成功之后服务器返回的token带到这个页面,验证用户是否已经登陆
             // 设置请求头，在请求头中带上token
