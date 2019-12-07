@@ -55,4 +55,32 @@
         </div>
     </div>
 </body>
+<script>
+    /*  
+    步骤思路：
+        1.验证用户是否已经登陆（token）
+        2.进入页面之后发送ajax请求获取用户信息
+        3.请求成功后将数据渲染到页面
+*/
+    $(function () {
+        // 发送ajax请求获取用户数据
+        $.ajax({
+            url: 'http://localhost:8080/api/v1/admin/user/info',
+            type: 'get',
+            // 要把登陆成功之后服务器返回的token带到这个页面,验证用户是否已经登陆
+            // 设置请求头，在请求头中带上token
+            headers: {
+                'Authorization': window.localStorage.getItem('token')
+            },
+            success: function (res) {
+                console.log(res);
+                // 请求成功，将服务器返回的数据渲染到页面展示
+                $('.user_info img').attr('src', res.data.userPic);
+                $('.user_info span').html('欢迎&nbsp;&nbsp;' + res.data.nickname + '');
+                $('.user_center_link>img').attr('src', res.data.userPic);
+            }
+        });
+    })
+</script>
+
 </html>
