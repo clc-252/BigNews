@@ -38,6 +38,83 @@
     </div>
   </div>
 
+
+  <!-- Modal -->
+  <div class="modal fade" id="modelId" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">提示</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="container-fluid">
+
+          </div>
+        </div>
+        <div class="modal-footer">
+          <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button> -->
+          <button type="button" class="btn btn-primary btn-sure-del" data-id="null" id="btn-sure"
+            data-dismiss="modal">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
+<script>
+  /*  
+  步骤思路：
+    1.给登陆按钮注册点击事件
+    2.取消submit按钮的默认提交功能
+    3.获取用户名和密码，验证码用户名和密码是否为空
+    4.发送ajax请求验证用户是否登陆成功
+      - 登陆成功就提示用户成功并跳转到主页
+      - 登陆失败也要提示用户
+*/
+
+  $(function () {
+    // 点击登陆按钮
+    $('.input_sub').on('click', function (e) {
+      // 因为登陆按钮是提交按钮，会主动发送一次提交，要把这个默认行为取消掉
+      e.preventDefault();
+      // 获取文本框中的内容
+      let userName = $('.input_txt').val();
+      let password = $('.input_pass').val();
+      // 判断文本框中的内容是否为空
+      if (userName.trim().length === 0 || password.trim().length === 0) {
+        // 说明用户名或密码为空，提示用户不能为空
+        $('#modelId').modal();
+        $('.container-fluid').text('用户名或密码不能为空');
+      }
+
+      // 用户名和密码不为空，发送ajax请求验证用户登录
+      $.ajax({
+        url: 'http://localhost:8080/api/v1/admin/user/login',
+        type: 'post',
+        data: {
+          username: userName,
+          password: password
+        },
+        success: function (res) {
+          console.log(res);
+          // 不管是否成功都要提示用户
+          $('#modelId').modal();
+          $('.container-fluid').text(res.msg);
+          if (res.code === 200) {
+            // 说明登陆成功,提示用户登陆成功并跳转到主页
+            // 发现弹出框还没来得及显示就已经跳转到主页，要让弹出框隐藏之后再跳转
+            $('#modelId').on('hidden.bs.modal', function () {
+              location.href = './index.html';
+            })
+          }
+          // 否则提示用户登陆失败
+        }
+      });
+    })
+  })
+</script>
 
 </html>
