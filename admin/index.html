@@ -69,9 +69,10 @@
             type: 'get',
             // 要把登陆成功之后服务器返回的token带到这个页面,验证用户是否已经登陆
             // 设置请求头，在请求头中带上token
-            headers: {
-                'Authorization': window.localStorage.getItem('token')
-            },
+            // headers: {
+            //     'Authorization': window.localStorage.getItem('token')
+            // },
+            // 发现每个页面都需要在访问的时候验证用户是否登陆，所以将token封装到jquery.js文件中，在引入这个文件的页面都会验证token
             success: function (res) {
                 console.log(res);
                 // 请求成功，将服务器返回的数据渲染到页面展示
