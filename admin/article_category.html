@@ -31,14 +31,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
+                    <!-- <tr>
                         <td>奇趣事</td>
                         <td>funny</td>
                         <td class="text-center">
                             <a href="javascript:void(0)" data-toggle="modal" class=" btn btn-info btn-xs">编辑</a>
                             <a href="javascript:void(0)" class="btn btn-danger btn-xs">删除</a>
                         </td>
-                    </tr>
+                    </tr> -->
                 </tbody>
                 <tfoot>
                     <tr>
@@ -51,5 +51,121 @@
             </table>
         </div>
     </div>
+
+    <!-- 使用bootstrap模态框 -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">新增分类</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="recipient-name" class="col-form-label">分类名称:</label>
+                            <input type="text" class="form-control" id="recipient-name">
+                        </div>
+                        <div class="form-group">
+                            <label for="message-text" class="col-form-label">分类别名:</label>
+                            <textarea class="form-control" id="message-text"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="btn-sure">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<!-- 先引入请求接口js文件 -->
+<script src="./libs/http.js"></script>
+<!-- 先写一个模板 -->
+<script type="text/html" id="categoryList">
+    {{each data}}
+    <tr>
+        <td>{{$value.name}}</td>
+        <td>{{$value.slug}}</td>
+        <td class="text-center">
+            <a href="javascript:void(0)" data-id="{{$value.id}}" data-toggle="modal" class=" btn btn-info btn-xs"
+                data-target="#myModal">编辑</a>
+            <a href="javascript:void(0)" data-id="{{$value.id}}" class="btn btn-danger btn-xs">删除</a>
+        </td>
+    </tr>
+    {{/each}}
+</script>
+<script>
+    $(function () {
+        // 先发送ajax请求获取所有文章类别
+        // 因为要多次使用这个ajax请求，所以封装起来，在需要的时候直接调用
+        getData();
+        function getData() {
+            $.get({
+                url: BigNew.category_list,
+                success: function (res) {
+                    // console.log(res);
+                    // 使用模板引擎将数据渲染到页面上
+                    let html = template('categoryList', res);
+                    $('tbody').html(html);
+                }
+            });
+        }
+
+
+        // 给新增按钮和编辑按钮添加data-target="#myModal"；就可以点击弹出模态框
+
+        // 因为新增按钮和编辑按钮共用一个模态框，所以要分辨是点击那个按钮才出发的模态框
+        $('#myModal').on('show.bs.modal', function (e) {
+            // e.relatedTarget获取到的就是触发这个模态框的元素
+            let dom = e.relatedTarget;
+            console.log(dom);
+            if (dom == $('#xinzengfenlei')[0]) {
+                // 说明是新增按钮触发模态框
+                $('#exampleModalLabel').text('新增分类');
+                $('#btn-sure').text('新增').addClass('btn-success').removeClass('btn-primary');
+                // 新增按钮注册点击事件
+                $('#btn-sure').on('click', function () {
+                    // 获取文本框的内容
+                    let name = $('#recipient-name').val();
+                    let slug = $('#message-text').val();
+                    // 判断文本框中的内容是否为空
+                    if (name.trim().length === 0 || slug.trim().length === 0) {
+                        alert('请填写数据');
+                        return;
+                    }
+                    // 发送ajax请求新增数据
+                    $.post({
+                        url: BigNew.category_add,
+                        data: {
+                            name: name,
+                            slug: slug
+                        },
+                        success: function (res) {
+                            console.log(res);
+                            if (res.code === 201) {
+                                // 说明添加成功，要把模态框隐藏
+                                $('#myModal').modal('hide');
+                                // 提示用户创建是否成功
+                                alert(res.msg);
+                                // 还要将新添加的分类显示到页面 - 发送ajax请求获取分类信息
+                                getData();
+                            }
+                        }
+                    });
+                })
+
+            } else {
+                // 否则就是编辑按钮触发的模态框
+                $('#exampleModalLabel').text('编辑分类');
+                $('#btn-sure').text('确定').addClass('btn-primary').removeClass('btn-success');
+            }
+        })
+    })
+</script>
 
 </html>
