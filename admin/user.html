@@ -69,5 +69,28 @@
         </div>
     </div>
 </body>
+<!-- 先引入请求接口js文件 -->
+<script src="./libs/http.js"></script>
+<script>
+    $(function () {
+        // 发送ajax请求，获取用户的详细信息
+        $.get({
+            url: BigNew.user_detail,
+            success: function (res) {
+                // console.log(res);
+                // 获取到用户信息之后，将信息渲染到页面
+                // $('input.username').val(res.data.username);
+                // $('input.nickname').val(res.data.nickname);
+                // $('input.email').val(res.data.email);
+                // $('input.password').val(res.data.password);
+                // 发现这里刚好类名跟键的名称是一样的，所以可以优化一下代码
+                for (var key in res.data) {
+                    $('input.' + key).val(res.data[key]);
+                }
+                $('img.user_pic').attr('src', res.data.userPic);
+            }
+        })
+    })
+</script>
 
 </html>
