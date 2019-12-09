@@ -65,6 +65,8 @@
                 </div>
                 <div class="modal-body">
                     <form>
+                        <!-- 使用一个隐藏域将类别的id存起来 -->
+                        <input type="hidden" name="id" id="cateid">
                         <div class="form-group">
                             <label for="recipient-name" class="col-form-label">分类名称:</label>
                             <input type="text" class="form-control" id="recipient-name">
@@ -104,6 +106,7 @@
         // 先发送ajax请求获取所有文章类别
         // 因为要多次使用这个ajax请求，所以封装起来，在需要的时候直接调用
         getData();
+
         function getData() {
             $.get({
                 url: BigNew.category_list,
@@ -123,7 +126,7 @@
         $('#myModal').on('show.bs.modal', function (e) {
             // e.relatedTarget获取到的就是触发这个模态框的元素
             let dom = e.relatedTarget;
-            console.log(dom);
+            // console.log(dom);
             if (dom == $('#xinzengfenlei')[0]) {
                 // 说明是新增按钮触发模态框
                 $('#exampleModalLabel').text('新增分类');
@@ -163,6 +166,58 @@
                 // 否则就是编辑按钮触发的模态框
                 $('#exampleModalLabel').text('编辑分类');
                 $('#btn-sure').text('确定').addClass('btn-primary').removeClass('btn-success');
+                // 点击编辑按钮的时候，获取id，将对应的内容显示到文本框中
+                let cateId = $(dom).attr('data-id');
+                // console.log(cateId);
+                // 发送ajax请求，获得该id的类别信息
+                $.get({
+                    url: BigNew.category_search,
+                    data: {
+                        id: cateId
+                    },
+                    success: function (res) {
+                        // console.log(res);
+                        if (res.code === 200) {
+                            // 请求成功之后，把数据渲染到页面
+                            $('#recipient-name').val(res.data[0].name);
+                            $('#message-text').val(res.data[0].slug);
+                            // 使用一个隐藏域将类别的id存起来,同步修改隐藏域中类别的id
+                            $('#cateid').val(res.data[0].id);
+                        }
+                    }
+                });
+
+                // 给确认编辑按钮注册点击事件
+                $('#btn-sure').on('click', function () {
+                    // 获取文本框中的内容
+                    let name = $('#recipient-name').val();
+                    let slug = $('#message-text').val();
+                    // 在隐藏域中取出id
+                    let id = $('#cateid').val();
+
+                    // 判断是否为空
+                    if (name.trim().length === 0 || slug.trim().length === 0) {
+                        alert('请填写数据');
+                        return;
+                    }
+                    // 不为空就发送ajax请求，将修改的数据发送到服务器并渲染到页面
+                    $.post({
+                        url: BigNew.category_edit,
+                        data: {
+                            id: id,
+                            name: name,
+                            slug: slug
+                        },
+                        success: function (res) {
+                            // console.log(res);
+                            if (res.code === 200) {
+                                // 说明修改成功，将模态框隐藏，并将修改过的数据发送到服务器并渲染到页面
+                                $('#myModal').modal('hide');
+                                getData();
+                            }
+                        }
+                    });
+                })
             }
         })
     })
