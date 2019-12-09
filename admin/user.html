@@ -89,6 +89,51 @@
                 }
                 $('img.user_pic').attr('src', res.data.userPic);
             }
+        });
+
+        // 实现图片预览
+        // 给表单元素注册change事件
+        $('#exampleInputFile').on('change', function () {
+            // 获取到用户选择的图片
+            let file = this.files[0];
+            // console.log(file);
+            // 将文件转换为src路径
+            // URL.createObjectURL()方法会根据传入的参数创建一个指向该参数对象的URL
+            let imgUrl = URL.createObjectURL(file);
+            // 修改图片的路径
+            $('.user_pic').attr('src', imgUrl);
+        });
+
+        // 编辑用户信息功能
+        // 给修改按钮注册点击事件
+        $('.btn-edit').on('click', function (e) {
+            // 阻止修改按钮的默认提交的行为
+            e.preventDefault();
+            // 获取表单信息
+            let data = $('#form')[0];
+            let userData = new FormData(data);
+            // 发送ajax请求
+            $.post({
+                url: BigNew.user_edit,
+                data: userData,
+                // 阻止编译
+                processData: false,
+                // 不要设置请求类型
+                contentType: false,
+                success: function (res) {
+                    // console.log(res);
+                    // 如果请求成功，将页面上的内容重新渲染
+                    $.get({
+                        url: BigNew.user_info,
+                        success: function (res) {
+                            // 修改的是父页面上的内容
+                            parent.$('.user_info img').attr('src', res.data.userPic);
+                            parent.$('.user_info span').html('欢迎&nbsp;&nbsp;' + res.data.nickname + '');
+                            parent.$('.user_center_link>img').attr('src', res.data.userPic);
+                        }
+                    });
+                }
+            });
         })
     })
 </script>
