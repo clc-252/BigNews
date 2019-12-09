@@ -96,7 +96,7 @@
         <td class="text-center">
             <a href="javascript:void(0)" data-id="{{$value.id}}" data-toggle="modal" class=" btn btn-info btn-xs"
                 data-target="#myModal">编辑</a>
-            <a href="javascript:void(0)" data-id="{{$value.id}}" class="btn btn-danger btn-xs">删除</a>
+            <a href="javascript:void(0)" data-id="{{$value.id}}" class="btn btn-danger btn-xs" id="btn-del">删除</a>
         </td>
     </tr>
     {{/each}}
@@ -218,6 +218,31 @@
                         }
                     });
                 })
+            }
+        })
+
+        // 实现删除功能 - 委托删除
+        $('tbody').on('click', '#btn-del', function () {
+            let deleteId = $(this).attr('data-id');
+            // console.log(deleteId);
+            // 当用户点击删除按钮，弹框提示用户
+            let answer = confirm('您确定要删除吗?');
+            // 但用户点击确定按钮返回true；否则返回false
+            if (answer) {
+                // 说明确认要删除，则发送ajax请求删除类别的数据
+                $.post({
+                    url: BigNew.category_delete,
+                    data: {
+                        id: deleteId
+                    },
+                    success: function (res) {
+                        // console.log(res);
+                        if (res.code === 204) {
+                            // 删除成功，重新加载页面数据
+                            getData();
+                        }
+                    }
+                });
             }
         })
     })
