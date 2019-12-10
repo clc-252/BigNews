@@ -69,12 +69,17 @@
                 </tbody>
             </table>
             <div class="row text-center">
+                <!-- 实现分页 -->
+                <ul id="pagination-demo" class="pagination-sm"></ul>
             </div>
         </div>
     </div>
 </body>
 <!-- 先引入请求接口js文件 -->
 <script src="./libs/http.js"></script>
+<!-- 引入实现分页效果插件的相关文件 -->
+<script src="./libs/bootstrap/js/bootstrap.min.js"></script>
+<script src="./libs/jquery.twbsPagination.js"></script>
 <!-- 写一个文章类别的模板 -->
 <script type="text/html" id="categoryList">
     <option value="">所有分类</option>
@@ -105,7 +110,7 @@
         $.get({
             url: BigNew.category_list,
             success: function (res) {
-                console.log(res);
+                // console.log(res);
                 // 使用模板引擎渲染到页面
                 let category_html = template('categoryList', res);
                 $('#selCategory').html(category_html);
@@ -126,10 +131,44 @@
                 perpage: perpage
             },
             success: function (res) {
-                console.log(res);
+                // console.log(res);
                 // 使用模板引擎将数据渲染到页面
                 let article_html = template('articleList', res);
                 $('tbody').html(article_html);
+
+                // 将页面的页码条也渲染到页面，实现分页的效果
+                $('#pagination-demo').twbsPagination({
+                    // 服务器返回一个总页数：totalPage
+                    totalPages: res.data.totalPage,
+                    visiblePages: 7,
+                    first: '首页',
+                    prev: '上一页',
+                    next: '下一页',
+                    last: '尾页',
+                    onPageClick: function (event, page) {
+                        // console.log(event);
+                        // console.log(page); 返回的是当前的页码
+                        // 将当前页码修改为点击之后的页码
+                        mypage = page;
+                        // 重新请求页面的数据
+                        $.get({
+                            url: BigNew.article_query,
+                            data: {
+                                type: $('#selCategory').val(),
+                                state: $('#selStatus').val(),
+                                page: mypage,
+                                perpage: perpage
+                            },
+                            success: function (res) {
+                                // console.log(res);
+                                // 使用模板引擎将数据渲染到页面
+                                let article_html = template('articleList',res);
+                                $('tbody').html(article_html);
+                            }
+                        });
+
+                    }
+                });
             }
         });
     })
