@@ -71,6 +71,7 @@
             <div class="row text-center">
                 <!-- 实现分页 -->
                 <ul id="pagination-demo" class="pagination-sm"></ul>
+                <div id="tips">空空如也</div>
             </div>
         </div>
     </div>
@@ -138,8 +139,16 @@
 
                     // 如果数据请求成功，在这里写代码做出相应处理
                     // 如果后续不需要处理，则不需要执行回调函数，所以这里需要判断传进来的回调函数是否为null
-                    if (callback != null) {
+                    // if (callback != null) {
+                    //     callback(res);
+                    // }
+                    if (res.data.data.length != 0 && callback != null) {
+                        $('#tips').hide();
+                        $('#pagination-demo').show();
                         callback(res);
+                    } else if (res.data.data.length === 0) {
+                        $('#tips').show();
+                        $('#pagination-demo').hide();
                     }
                 }
             })
@@ -190,23 +199,28 @@
             // let type = $('#selCategory').val();
             // let state = $('#selStatus').val();
             // 发送ajax请求，获得符合条件的数据，渲染到页面
-            $.get({
-                url: BigNew.article_query,
-                data: {
-                    type: $('#selCategory').val(),
-                    state: $('#selStatus').val(),
-                    page: mypage,
-                    perpage: perpage
-                },
-                success: function (res) {
-                    let article_html = template('articleList', res);
-                    $('tbody').html(article_html);
-                    // 筛选之后总页码会改变，所以也要修改总页码
-                    $('#pagination-demo').twbsPagination('changeTotalPages', res.data
-                        .totalPage, 1);
-                    // 调用插件自己提供的修改总页码的方法（changeTotalPages），并将res.data.totalPage,1作为参数传到该方法里面
-                }
-            });
+            // $.get({
+            //     url: BigNew.article_query,
+            //     data: {
+            //         type: $('#selCategory').val(),
+            //         state: $('#selStatus').val(),
+            //         page: mypage,
+            //         perpage: perpage
+            //     },
+            //     success: function (res) {
+            //         let article_html = template('articleList', res);
+            //         $('tbody').html(article_html);
+            //         // 筛选之后总页码会改变，所以也要修改总页码
+            //         $('#pagination-demo').twbsPagination('changeTotalPages', res.data
+            //             .totalPage, 1);
+            //         // 调用插件自己提供的修改总页码的方法（changeTotalPages），并将res.data.totalPage,1作为参数传到该方法里面
+            //     }
+            // });
+
+            // 优化代码,使用上面封装的getArtlistData方法
+            getArtlistData(mypage, function (res) {
+                $('#pagination-demo').twbsPagination('changeTotalPages', res.data.totalPage, 1);
+            })
         })
 
 
