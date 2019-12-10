@@ -180,7 +180,7 @@
         //     this.options.totalPages = totalPages;
         //     return this.show(currentPage);
         // },
-        
+
         // 注册点击事件
         $('#btnSearch').on('click', function (e) {
             // 取消按钮的默认行为
@@ -202,10 +202,45 @@
                     let article_html = template('articleList', res);
                     $('tbody').html(article_html);
                     // 筛选之后总页码会改变，所以也要修改总页码
-                    $('#pagination-demo').twbsPagination('changeTotalPages',res.data.totalPage,1);
+                    $('#pagination-demo').twbsPagination('changeTotalPages', res.data
+                        .totalPage, 1);
                     // 调用插件自己提供的修改总页码的方法（changeTotalPages），并将res.data.totalPage,1作为参数传到该方法里面
                 }
             });
+        })
+
+
+        // 实现删除功能 - 委托删除
+        $('tbody').on('click', '.delete', function () {
+            let delId = $(this).attr('data-id');
+            // console.log(delId);
+            // console.log(mypage);
+            // 弹框提示用户是否确定删除
+            let answer = confirm('您确定要删除吗？');
+            if (answer) {
+                // 发送ajax请求删除对应的数据
+                $.post({
+                    url: BigNew.article_delete,
+                    data: {
+                        id: delId
+                    },
+                    success: function (res) {
+                        console.log(res);
+                        // 重新请求文章列表数据
+                        getArtlistData(mypage, function (backData) {
+                            console.log(backData);
+                            // 如果获取到的当前页的数据长度为0切总页数不为1
+                            if (backData.data.data.length === 0 && backData.data
+                                .totalPage != 1) {
+                                //说明当前页数据为0，但是还有其他页有数据，要让页码条的页数减少，然后显示前一页的内容
+                                $('#pagination-demo').twbsPagination(
+                                    'changeTotalPages', backData.data
+                                    .totalPage, mypage - 1);
+                            }
+                        });
+                    }
+                });
+            }
         })
     })
 </script>
