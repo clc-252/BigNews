@@ -36,7 +36,7 @@
                             <option value="草稿">草稿</option>
                             <option value="已发布">已发布</option>
                         </select>
-                        <button id="btnSearch" class="btn btn-default btn-sm">筛选</button>
+                        <button id="btnSearch" class="btn btn-primary btn-sm">筛选</button>
                     </form>
                 </div>
                 <div class="col-xs-6">
@@ -137,7 +137,7 @@
                     $('tbody').html(article_html);
 
                     // 如果数据请求成功，在这里写代码做出相应处理
-                    // 如果后续不需要处理，则不需要执行回调函数，所以这里需要判断传进来的回调函数时候为null
+                    // 如果后续不需要处理，则不需要执行回调函数，所以这里需要判断传进来的回调函数是否为null
                     if (callback != null) {
                         callback(res);
                     }
@@ -170,6 +170,43 @@
                 }
             });
         });
+
+
+        // 实现筛选功能
+
+        // Pagintion分页插件提供了一个修改总页数的方法
+        // totalPages - 总页码     currentPage - 当前页
+        // changeTotalPages: function(totalPages, currentPage) {
+        //     this.options.totalPages = totalPages;
+        //     return this.show(currentPage);
+        // },
+        
+        // 注册点击事件
+        $('#btnSearch').on('click', function (e) {
+            // 取消按钮的默认行为
+            e.preventDefault();
+
+            // 获取当前文章类别和文章状态
+            // let type = $('#selCategory').val();
+            // let state = $('#selStatus').val();
+            // 发送ajax请求，获得符合条件的数据，渲染到页面
+            $.get({
+                url: BigNew.article_query,
+                data: {
+                    type: $('#selCategory').val(),
+                    state: $('#selStatus').val(),
+                    page: mypage,
+                    perpage: perpage
+                },
+                success: function (res) {
+                    let article_html = template('articleList', res);
+                    $('tbody').html(article_html);
+                    // 筛选之后总页码会改变，所以也要修改总页码
+                    $('#pagination-demo').twbsPagination('changeTotalPages',res.data.totalPage,1);
+                    // 调用插件自己提供的修改总页码的方法（changeTotalPages），并将res.data.totalPage,1作为参数传到该方法里面
+                }
+            });
+        })
     })
 </script>
 <!-- <script>
