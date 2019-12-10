@@ -106,7 +106,9 @@
 </script>
 <script>
     $(function () {
-        // 发送ajax请求，请求文章类别的数据
+        // 优化代码，将重复使用的代码封装起来
+
+        // 页面加载出来就发送请求，将文章类别的数据显示出来
         $.get({
             url: BigNew.category_list,
             success: function (res) {
@@ -118,60 +120,124 @@
         });
 
         // 发送ajax请求，获取所有文章列表的数据
+        // 将这个获取文章列表数据的请求封装成一个方法
+        function getArtlistData(pages, callback) {
+            $.get({
+                url: BigNew.article_query,
+                data: {
+                    type: $('#selCategory').val(),
+                    state: $('#selStatus').val(),
+                    page: pages,
+                    perpage: perpage
+                },
+                success: function (res) {
+                    // console.log(res);
+                    // 使用模板引擎将数据渲染到页面
+                    let article_html = template('articleList', res);
+                    $('tbody').html(article_html);
+
+                    // 如果数据请求成功，在这里写代码做出相应处理
+                    // 如果后续不需要处理，则不需要执行回调函数，所以这里需要判断传进来的回调函数时候为null
+                    if (callback != null) {
+                        callback(res);
+                    }
+                }
+            })
+        }
 
         // 定义两个变量，设置当前页和每页显示的条数
         let mypage = 1;
         let perpage = 10;
-        $.get({
-            url: BigNew.article_query,
-            data: {
-                type: $('#selCategory').val(),
-                state: $('#selStatus').val(),
-                page: mypage,
-                perpage: perpage
-            },
-            success: function (res) {
-                // console.log(res);
-                // 使用模板引擎将数据渲染到页面
-                let article_html = template('articleList', res);
-                $('tbody').html(article_html);
-
-                // 将页面的页码条也渲染到页面，实现分页的效果
-                $('#pagination-demo').twbsPagination({
-                    // 服务器返回一个总页数：totalPage
-                    totalPages: res.data.totalPage,
-                    visiblePages: 7,
-                    first: '首页',
-                    prev: '上一页',
-                    next: '下一页',
-                    last: '尾页',
-                    onPageClick: function (event, page) {
-                        // console.log(event);
-                        // console.log(page); 返回的是当前的页码
-                        // 将当前页码修改为点击之后的页码
-                        mypage = page;
-                        // 重新请求页面的数据
-                        $.get({
-                            url: BigNew.article_query,
-                            data: {
-                                type: $('#selCategory').val(),
-                                state: $('#selStatus').val(),
-                                page: mypage,
-                                perpage: perpage
-                            },
-                            success: function (res) {
-                                // console.log(res);
-                                // 使用模板引擎将数据渲染到页面
-                                let article_html = template('articleList',res);
-                                $('tbody').html(article_html);
-                            }
-                        });
-
-                    }
-                });
-            }
+        // 当页面显示就要请求数据将文章列表显示出来
+        getArtlistData(mypage, function (res) {
+            // 将页面的页码条也渲染到页面，实现分页的效果
+            $('#pagination-demo').twbsPagination({
+                // 服务器返回一个总页数：totalPage
+                totalPages: res.data.totalPage,
+                visiblePages: 7,
+                first: '首页',
+                prev: '上一页',
+                next: '下一页',
+                last: '尾页',
+                onPageClick: function (event, page) {
+                    // console.log(event);
+                    // console.log(page); 返回的是当前的页码
+                    // 将当前页码修改为点击之后的页码
+                    mypage = page;
+                    // 重新请求加载文章列表的数据
+                    getArtlistData(mypage, null);
+                    // 这里只需要重新请求数据就可以了，不需要后续处理，所以回调函数的值为null就可以了
+                }
+            });
         });
     })
 </script>
+<!-- <script>
+    // 发送ajax请求，请求文章类别的数据
+    $.get({
+        url: BigNew.category_list,
+        success: function (res) {
+            // console.log(res);
+            // 使用模板引擎渲染到页面
+            let category_html = template('categoryList', res);
+            $('#selCategory').html(category_html);
+        }
+    });
+
+    // 发送ajax请求，获取所有文章列表的数据
+
+    // 定义两个变量，设置当前页和每页显示的条数
+    let mypage = 1;
+    let perpage = 10;
+    $.get({
+        url: BigNew.article_query,
+        data: {
+            type: $('#selCategory').val(),
+            state: $('#selStatus').val(),
+            page: mypage,
+            perpage: perpage
+        },
+        success: function (res) {
+            // console.log(res);
+            // 使用模板引擎将数据渲染到页面
+            let article_html = template('articleList', res);
+            $('tbody').html(article_html);
+
+            // 将页面的页码条也渲染到页面，实现分页的效果
+            $('#pagination-demo').twbsPagination({
+                // 服务器返回一个总页数：totalPage
+                totalPages: res.data.totalPage,
+                visiblePages: 7,
+                first: '首页',
+                prev: '上一页',
+                next: '下一页',
+                last: '尾页',
+                onPageClick: function (event, page) {
+                    // console.log(event);
+                    // console.log(page); 返回的是当前的页码
+                    // 将当前页码修改为点击之后的页码
+                    mypage = page;
+                    // 重新请求页面的数据
+                    $.get({
+                        url: BigNew.article_query,
+                        data: {
+                            type: $('#selCategory').val(),
+                            state: $('#selStatus').val(),
+                            page: mypage,
+                            perpage: perpage
+                        },
+                        success: function (res) {
+                            // console.log(res);
+                            // 使用模板引擎将数据渲染到页面
+                            let article_html = template('articleList', res);
+                            $('tbody').html(article_html);
+                        }
+                    });
+
+                }
+            });
+        }
+    });
+</script> -->
 
 </html>
