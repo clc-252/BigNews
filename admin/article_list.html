@@ -132,7 +132,7 @@
                     perpage: perpage
                 },
                 success: function (res) {
-                    // console.log(res);
+                    console.log(res);
                     // 使用模板引擎将数据渲染到页面
                     let article_html = template('articleList', res);
                     $('tbody').html(article_html);
@@ -142,11 +142,11 @@
                     // if (callback != null) {
                     //     callback(res);
                     // }
-                    if (res.data.data.length != 0 && callback != null) {
+                    if (res.data.totalPage != 0 && callback != null) {
                         $('#tips').hide();
                         $('#pagination-demo').show();
                         callback(res);
-                    } else if (res.data.data.length === 0) {
+                    } else if (res.data.totalPage == 0) {
                         $('#tips').show();
                         $('#pagination-demo').hide();
                     }
