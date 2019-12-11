@@ -131,6 +131,8 @@
                 // 说明是新增按钮触发模态框
                 $('#exampleModalLabel').text('新增分类');
                 $('#btn-sure').text('新增').addClass('btn-success').removeClass('btn-primary');
+                //将表单中的数据全部重置，而reset()重置这个方法是原生对象的。
+                $('form')[0].reset();
                 // 新增按钮注册点击事件
                 $('#btn-sure').on('click', function () {
                     // 获取文本框的内容

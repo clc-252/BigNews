@@ -132,7 +132,7 @@
                     perpage: perpage
                 },
                 success: function (res) {
-                    console.log(res);
+                    // console.log(res);
                     // 使用模板引擎将数据渲染到页面
                     let article_html = template('articleList', res);
                     $('tbody').html(article_html);
@@ -239,10 +239,10 @@
                         id: delId
                     },
                     success: function (res) {
-                        console.log(res);
+                        // console.log(res);
                         // 重新请求文章列表数据
                         getArtlistData(mypage, function (backData) {
-                            console.log(backData);
+                            // console.log(backData);
                             // 如果获取到的当前页的数据长度为0切总页数不为1
                             if (backData.data.data.length === 0 && backData.data
                                 .totalPage != 1) {
