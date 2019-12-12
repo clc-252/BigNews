@@ -161,6 +161,59 @@
                 }
             }
         })
+
+        // 点击修改按钮，更新文章数据
+        $('.btn-edit').on('click', function (e) {
+            // 阻止submit按钮的默认行为
+            e.preventDefault();
+            // 使用FormData传递数据
+            let fd = new FormData($('#form')[0]);
+            fd.append('content', editor.txt.html());
+            // 点击修改，默认文章已发布
+            fd.append('state', '已发布');
+            fd.append('id', articleId);
+            // 发送ajax请求
+            $.post({
+                url: BigNew.article_edit,
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function (res) {
+                    if (res.code === 200) {
+                        // 跳转到列表页
+                        // location.href='./article_list.html';
+                        window.history.back();
+                    }
+                }
+            });
+        })
+
+        // 点击存为草稿
+        $('.btn-draft').on('click', function (e) {
+            // 阻止submit按钮的默认行为
+            e.preventDefault();
+            // 使用FormData传递数据
+            let fd = new FormData($('#form')[0]);
+            fd.append('content', editor.txt.html());
+            // 点击修改，默认文章已发布
+            // fd.append('state', '已发布');
+            // 为空默认为草稿
+            fd.append('id', articleId);
+            // 发送ajax请求
+            $.post({
+                url: BigNew.article_edit,
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function (res) {
+                    if (res.code === 200) {
+                        // 跳转到列表页
+                        // location.href='./article_list.html';
+                        window.history.back();
+                    }
+                }
+            });
+        })
     })
 </script>
 
