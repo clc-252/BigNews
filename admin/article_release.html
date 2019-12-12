@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/iconfont.css">
     <link rel="stylesheet" href="css/main.css">
+    <!-- 引入jeDate日期插件相关css文件 -->
+    <link rel="stylesheet" href="./libs/jedate/css/jeDate-test.css">
+    <link rel="stylesheet" href="./libs/jedate/css/jedate.css">
     <!-- jq -->
     <script src="./libs/jquery-1.12.4.min.js"></script>
     <!-- 模板引擎 -->
@@ -40,22 +43,35 @@
                     <label for="inputCategory" class="col-sm-2 control-label">文章类别：</label>
                     <div class="col-sm-4">
                         <select class="form-control category" name="categoryId">
-                            <option>类别一</option>
+                            <!-- <option>类别一</option>
                             <option>类别二</option>
                             <option>类别三</option>
                             <option selected>类别四</option>
-                            <option>类别五</option>
+                            <option>类别五</option> -->
                         </select>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-2 control-label">发布时间：</label>
                     <div class="col-sm-4">
+                        <!-- 写jeDate日期插件的html结构 -->
+                        <div class="jeitem">
+                            <div class="jeinpbox">
+                                <input type="text" name="date" class="jeinput" id="testico" placeholder="YYYY-MM-DD">
+                                <div class="icons jebtns"
+                                    onclick="jeDate('#testico',{trigger:false,format: 'YYYY-MM-DD',theme: { bgcolor: '#00A680', pnColor: '#00DDAA' },zIndex:30000,isinitVal:true})">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章内容：</label>
                     <div class="col-sm-10">
+                        <!-- wangEditor富文本编辑器 -->
+                        <div id="editor">
+                            <p>请尽情的展示的文采</p>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
@@ -68,5 +84,103 @@
         </div>
     </div>
 </body>
+<script src="./libs/http.js"></script>
+<!-- 引入jeDate日期插件的js文件 -->
+<script src="./libs/jedate/js/jedate.js"></script>
+<!-- 引入wangEditor富文本编辑器的js文件 -->
+<script src="./libs/wangEditor.js"></script>
+<!-- 写一个文章类别模板 -->
+<script type="text/html" id="categoryList">
+    {{each data}}
+    <option value='{{$value.id}}'>{{$value.name}}</option>
+    {{/each}}
+</script>
+<script>
+    $(function () {
+        // 1.实现图片的预览功能
+        $('#inputCover').on('change', function () {
+            let imgFile = this.files[0];
+            let imgUrl = URL.createObjectURL(imgFile);
+            $('.article_cover').attr('src', imgUrl);
+        })
+        // 2.发送ajax请求，将文章类别渲染到页面
+        $.get({
+            url: BigNew.category_list,
+            success: function (res) {
+                let category_html = template('categoryList', res);
+                $('.category').html(category_html);
+            }
+        });
+        // 3.使用jeDate插件
+        // 点击文本框也能弹出选择时间的框
+        jeDate('#testico', {
+            format: "YYYY-MM-DD",
+            isTime: false,
+            theme: {
+                bgcolor: '#00A680',
+                pnColor: '#00DDAA'
+            },
+            // 给jeDate日期插件升高层级
+            zIndex: 30000,
+            // 默认的时间
+            isinitVal: true,
+        })
+        // 4.使用富文本编辑器
+        var E = window.wangEditor;
+        var editor = new E('#editor');
+        // 或者 var editor = new E( document.getElementById('editor') )
+        editor.create();
+
+        // 发送ajax请求，发布文章
+        // 给按钮注册点击事件
+        $('.btn-release').on('click', function (e) {
+            // 阻止默认行为
+            e.preventDefault();
+            // 使用formdata提交数据
+            let fd = new FormData($('#form')[0]);
+            fd.append('content', editor.txt.html());
+            // 点击修改，默认文章已发布
+            fd.append('state', '已发布');
+
+            // 发送ajax请求
+            $.post({
+                url: BigNew.article_publish,
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function (res) {
+                    // console.log(res);
+                    if (res.code === 200) {
+                        // 跳转到列表页
+                        // location.href='./article_list.html';
+                        window.history.back();
+                    }
+                }
+            });
+        })
+
+        // 存为草稿
+        $('.btn-draft').on('click', function (e) {
+            // 阻止默认行为
+            e.preventDefault();
+            // 使用formdata提交数据
+            let fd = new FormData($('#form')[0]);
+            fd.append('content', editor.txt.html());
+            // 发送请求
+            $.post({
+                url: BigNew.article_publish,
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function (res) {
+                    console.log(res);
+                    if(res.code===200){
+                        window.history.back();
+                    }
+                }
+            });
+        })
+    })
+</script>
 
 </html>
