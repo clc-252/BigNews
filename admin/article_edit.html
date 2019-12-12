@@ -58,7 +58,7 @@
                         <div class="jeinpbox">
                             <input type="text" name="date" class="jeinput" id="testico" placeholder="YYYY-MM-DD">
                             <div class="icons jebtns"
-                                onclick="jeDate('#testico',{trigger:false,format: 'YYYY-MM-DD',theme: { bgcolor: '#00A680', pnColor: '#00DDAA' }})">
+                                onclick="jeDate('#testico',{trigger:false,format: 'YYYY-MM-DD',theme: { bgcolor: '#00A680', pnColor: '#00DDAA' },zIndex:30000})">
                             </div>
                         </div>
                     </div>
@@ -69,6 +69,12 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章内容：</label>
                     <div class="col-sm-10">
+                        <!-- wangEditor富文本编辑器 -->
+                        <!-- <div id="editor">
+                            <p>请尽情的展示的文采</p>
+                        </div> -->
+                        <!-- tinymce富文本编辑器 -->
+                        <input type="text" class="form-control" id="mytextarea" placeholder="文章内容" value="文章内容">
                     </div>
                 </div>
                 <div class="form-group">
@@ -84,6 +90,13 @@
 <script src="./libs/http.js"></script>
 <!-- 引入jeDate日期插件的js文件 -->
 <script src="./libs/jedate/js/jedate.js"></script>
+<!-- 引入wangEditor富文本编辑器的js文件 -->
+<script src="./libs/wangEditor.js"></script>
+<!-- tinymce富文本编辑器插件 -->
+<script src="./libs/tinymce/tinymce.min.js"></script>
+<!-- jsDate + tinumce配置文件 -->
+<script src="./libs/config.js"></script>
+
 <!-- 写一个文章分类的模板 -->
 <script type="text/html" id="categoryList">
     {{each data}}
@@ -114,9 +127,17 @@
             theme: {
                 bgcolor: '#00A680',
                 pnColor: '#00DDAA'
-            }
+            },
+            // 给jeDate日期插件升高层级
+            zIndex: 30000
         })
-
+        // 4.添加富文本编辑器
+        // 方法一：wangEditor富文本编辑器
+        // var E = window.wangEditor;
+        // var editor = new E('#editor');
+        // // 或者 var editor = new E( document.getElementById('editor') )
+        // editor.create();
+        // 方法二：使用tinyMCE富文本编辑器插件
     })
 </script>
 
