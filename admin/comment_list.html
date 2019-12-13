@@ -143,7 +143,7 @@
         <tbody></tbody>
       </table>
       <div class="row text-center">
-        <ul class="pagination pagination-sm">
+        <!-- <ul class="pagination pagination-sm">
           <li class="page-item first disabled"><a href="#" class="page-link">首页</a></li>
           <li class="page-item prev disabled"><a href="#" class="page-link">上一页</a></li>
           <li class="page-item active"><a href="#" class="page-link">1</a></li>
@@ -155,7 +155,8 @@
           <li class="page-item"><a href="#" class="page-link">7</a></li>
           <li class="page-item next"><a href="#" class="page-link">下一页</a></li>
           <li class="page-item last"><a href="#" class="page-link">尾页</a></li>
-        </ul>
+        </ul> -->
+        <!-- 使用插件实现分页 -->
         <ul id="pagination" class="pagination-sm"></ul>
       </div>
 
@@ -163,6 +164,9 @@
   </div>
 </body>
 <script src="./libs/http.js"></script>
+<!-- 引入实现分页的相关文件 -->
+<script src="./libs/bootstrap/js/bootstrap.min.js"></script>
+<script src="./libs/jquery.twbsPagination.js"></script>
 <!-- 写一个评论的模板 -->
 <!-- 
   待审核 - 批准+删除  - 待审核的评论还有不一样的样式 - danger
@@ -183,35 +187,61 @@
     <td>{{$value.state}}</td>
     <td class="text-center">
       {{if $value.state=='待审核'}}
-      <a href="javascript:editTr( 'rejected',11 );" data-id="{{$value.id}}" class="btn btn-primary btn-xs">批准</a>
+      <a href="javascript:editTr( 'rejected',11 );" data-id="{{$value.id}}" class="btn btn-primary btn-xs btn-pass">批准</a>
       {{else if $value.state=='已通过'}}
-      <a href="javascript:editTr( 'rejected',11 );" data-id="{{$value.id}}" class="btn btn-warning btn-xs">拒绝</a>
+      <a href="javascript:editTr( 'rejected',11 );" data-id="{{$value.id}}" class="btn btn-warning btn-xs btn-reject">拒绝</a>
       {{else if $value.state=='已拒绝'}}
-      <a href="javascript:editTr( 'rejected',11 );" data-id="{{$value.id}}" class="btn btn-success btn-xs">通过</a>
+      <a href="javascript:editTr( 'rejected',11 );" data-id="{{$value.id}}" class="btn btn-success btn-xs btn-pass">通过</a>
       {{/if}}
-      <a href="javascript:editTr( 'trashed',11 );" data-id="{{$value.id}}" class="btn btn-danger btn-xs">删除</a>
+      <a href="javascript:editTr( 'trashed',11 );" data-id="{{$value.id}}" class="btn btn-danger btn-xs btn-delete">删除</a>
     </td>
   </tr>
   {{/each}}
 </script>
 <script>
   $(function () {
+
     let mypage = 1;
     let perpage = 10;
-    // 发送请求将评论列表数据渲染到页面
-    $.get({
-      url: BigNew.comment_list,
-      data: {
-        page: mypage,
-        perpage: perpage
-      },
-      success: function (res) {
-        console.log(res);
-        // 使用模板引擎将数据渲染到页面
-        let comment_html = template('commentList', res);
-        $('tbody').html(comment_html);
-      }
-    });
+    // 发送请求将评论列表数据渲染到页面 - 封装成一个方法
+    function getCommentData(pages, callback) {
+      $.get({
+        url: BigNew.comment_list,
+        data: {
+          page: mypage,
+          perpage: perpage
+        },
+        success: function (res) {
+          console.log(res);
+          // 使用模板引擎将数据渲染到页面
+          let comment_html = template('commentList', res);
+          $('tbody').html(comment_html);
+          if (callback != null) {
+            callback(res)
+          }
+        }
+      });
+    }
+
+
+    // 实现分页 - 调用getCommentData方法
+    getCommentData(mypage, function (res) {
+      $('#pagination').twbsPagination({
+        totalPages: res.data.totalPage,
+        visiblePages: 7,
+        first: '首页',
+        prev: '上一页',
+        next: '下一页',
+        last: '尾页',
+        onPageClick: function (event, page) {
+          // 改变当前页
+          mypage=page;
+          // 重新获取数据
+          getCommentData(mypage,null);
+        }
+      });
+    })
+
   })
 </script>
 
