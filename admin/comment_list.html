@@ -158,6 +158,8 @@
         </ul> -->
         <!-- 使用插件实现分页 -->
         <ul id="pagination" class="pagination-sm"></ul>
+        <!-- 提示用户没有数据 -->
+        <div class="tips">一条评论也没有~</div>
       </div>
 
     </div>
@@ -187,17 +189,13 @@
     <td>{{$value.state}}</td>
     <td class="text-center">
       {{if $value.state=='待审核'}}
-      <a href="javascript:void(0);;" data-id="{{$value.id}}"
-        class="btn btn-primary btn-xs btn-pass">批准</a>
+      <a href="javascript:void(0);;" data-id="{{$value.id}}" class="btn btn-primary btn-xs btn-pass">批准</a>
       {{else if $value.state=='已通过'}}
-      <a href="javascript:void(0);;" data-id="{{$value.id}}"
-        class="btn btn-warning btn-xs btn-reject">拒绝</a>
+      <a href="javascript:void(0);;" data-id="{{$value.id}}" class="btn btn-warning btn-xs btn-reject">拒绝</a>
       {{else if $value.state=='已拒绝'}}
-      <a href="javascript:void(0);;" data-id="{{$value.id}}"
-        class="btn btn-success btn-xs btn-pass">通过</a>
+      <a href="javascript:void(0);;" data-id="{{$value.id}}" class="btn btn-success btn-xs btn-pass">通过</a>
       {{/if}}
-      <a href="javascript:void(0);;" data-id="{{$value.id}}"
-        class="btn btn-danger btn-xs btn-delete">删除</a>
+      <a href="javascript:void(0);;" data-id="{{$value.id}}" class="btn btn-danger btn-xs btn-delete">删除</a>
     </td>
   </tr>
   {{/each}}
@@ -206,7 +204,7 @@
   $(function () {
 
     let mypage = 1;
-    let perpage = 10;
+    let perpage = 11;
     // 发送请求将评论列表数据渲染到页面 - 封装成一个方法
     function getCommentData(pages, callback) {
       $.get({
@@ -220,8 +218,23 @@
           // 使用模板引擎将数据渲染到页面
           let comment_html = template('commentList', res);
           $('tbody').html(comment_html);
-          if (callback != null) {
-            callback(res)
+          // if (callback != null) {
+          //   callback(res)
+          // }
+          // 如果总页码数不为0 - 证明还有数据， 且回调函数不为空
+          if (res.data.totalPage != 0 && callback != null) {
+            // 隐藏没有数据的提示
+            $('.tips').hide();
+            // 显示页码条
+            $('#pagination').show();
+            // 执行回调函数
+            callback(res);
+          } else if (res.data.totalPage == 0) {
+            // 如果总页数为0，证明没有数据了
+            // 显示提示没有数据的信息
+            $('.tips').show();
+            // 隐藏页码条
+            $('#pagination').hide();
           }
         }
       });
@@ -261,6 +274,7 @@
         success: function (res) {
           // console.log(res);
           if (res.code === 200) {
+            alert(res.msg);
             // 说明修改成功重新加载当前页面
             getCommentData(mypage, null);
           }
@@ -282,11 +296,39 @@
         success: function (res) {
           // console.log(res);
           if (res.code === 200) {
+            alert(res.msg);
             // 说明修改成功重新加载当前页面
             getCommentData(mypage, null);
           }
         }
       });
+    })
+
+    // 实现删除功能
+    $('tbody').on('click', '.btn-delete', function () {
+      let id = $(this).attr('data-id');
+      // 提示用户是否确定删除
+      if (confirm('您是否确定要删除该评论？')) {
+        // 确定，发送请求删除该数据
+        $.post({
+          url: BigNew.comment_delete,
+          data: {
+            id: id
+          },
+          success: function (res) {
+            if (res.code === 200) {
+              getCommentData(mypage, function (backData) {
+                // 如果当前页面数据为零，且总页数不为1，证明前面还有数据，删除之后应该显示前一页的数据
+                if (backData.data.data.length === 0 && backData.data.totalPage != 1) {
+                  // 修改总页码数，并跳转到当前页的前一页
+                  $('#pagination').twbsPagination('changeTotalPages', backData.data.totalPage, mypage - 1);
+                }
+              })
+            }
+          }
+        });
+      }
+
     })
   })
 </script>
